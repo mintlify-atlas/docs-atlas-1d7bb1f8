@@ -1,7 +1,7 @@
 ---
-title: "amongGX: An Among Us Browser Built with PyQt5"
+title: "amongGX: Among Us-Themed Desktop Browser via PyQt5"
 sidebarTitle: "Introduction"
-description: "amongGX is a PyQt5 desktop browser themed around Among Us. Learn its architecture, key features, and how QtWebEngine powers the browsing experience."
+description: "amongGX is an Among Us-themed PyQt5 desktop browser. Discover its single-file architecture, nine public class methods, and how QtWebEngine powers it."
 ---
 
 ## What is amongGX?
@@ -103,6 +103,24 @@ Four one-click toolbar shortcuts round out the toolbar:
 
 ### 🌐 Default Home Page
 The browser opens on `https://Among.robowolf.repl.co` — an Among Us fan page — on every launch. The same URL is restored whenever the Home button is clicked.
+
+---
+
+## Method Reference
+
+`MainWindow` exposes nine public methods. Together they cover all UI behaviour — from initial setup to every toolbar action:
+
+| Method | Signature | Description |
+|---|---|---|
+| `__init__` | `__init__(self, *args, **kwargs)` | Builds the entire UI: creates the `QWebEngineView`, wires signals, constructs toolbars, and calls `self.show()` |
+| `update_title` | `update_title(self)` | Called when `loadFinished` fires; reads the page title and sets the window title to `Among - <title>` |
+| `update_urlbar` | `update_urlbar(self, q)` | Called when `urlChanged` fires; updates the URL bar text to the current page URL |
+| `navigate_to_url` | `navigate_to_url(self)` | Reads the URL bar, prepends `http://` if no scheme is present, then loads the URL |
+| `go_home` | `go_home(self)` | Navigates the web view to the default home page at `https://Among.robowolf.repl.co` |
+| `discord` | `discord(self)` | Quick-link: navigates to `https://www.discord.com` |
+| `trap` | `trap(self)` | Quick-link (♫ button): navigates to a YouTube music video for a "vibe check" |
+| `get_amongus` | `get_amongus(self)` | Quick-link (ඞ button): navigates to the Among Us Steam store page |
+| `subscribe` | `subscribe(self)` | Quick-link (👍 button): navigates to the creator's YouTube channel |
 
 ---
 

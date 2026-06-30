@@ -1,7 +1,7 @@
 ---
-title: "Navigating the Web with amongGX"
+title: "Navigating the Web with amongGX: URL Bar, History & Home"
 sidebarTitle: "Navigation"
-description: "Learn how to browse the web in amongGX using the URL bar, back/forward buttons, reload, and the home shortcut to the Among Us fan page."
+description: "Learn how among GX handles URL entry, automatic scheme injection, back/forward history, reload, home navigation, and live URL bar updates via Qt signals."
 ---
 
 amongGX provides a familiar browser navigation experience built on top of PyQt5's `QWebEngineView`. Every control — from typing a URL to jumping back in history — is wired directly into Qt's web engine.
@@ -22,7 +22,7 @@ You don't need to type `http://` every time. If the URL you enter has no scheme,
 ```python
 def navigate_to_url(self):
     q = QUrl(self.urlbar.text())
-    if q.scheme() == "":
+    if q.scheme()=="":
         q.setScheme("http")
     self.browser.setUrl(q)
 ```
@@ -83,6 +83,33 @@ def update_urlbar(self, q):
 ```
 
 The `q` argument is a `QUrl` object; `q.toString()` converts it to the plain string shown in the bar.
+
+## Automatic Title Updates
+
+Whenever a page finishes loading, the `loadFinished` signal fires and calls `update_title`, which updates the window title to reflect the current page:
+
+```python
+self.browser.loadFinished.connect(self.update_title)
+```
+
+```python
+def update_title(self):
+    title = self.browser.page().title()
+    self.setWindowTitle(f"Among - {title}")
+```
+
+The window title always takes the form `Among - <page title>`, so you can identify the current page at a glance even when the URL bar is not visible.
+
+## Status Bar Hover Tips
+
+The `QStatusBar` at the bottom of the window displays contextual help text whenever you hover over any toolbar button. This is powered entirely by Qt's built-in status tip mechanism — each `QAction` registers its tip via `setStatusTip()`, and Qt routes it to the status bar automatically:
+
+```python
+self.status = QStatusBar()
+self.setStatusBar(self.status)
+```
+
+For example, hovering over the **Home** button shows `"Return to the Skeld"` in the status bar. No extra event handling is needed beyond declaring `setStatusTip()` on each action.
 
 ---
 
