@@ -1,0 +1,113 @@
+---
+title: "Navigating the Web with amongGX"
+sidebarTitle: "Navigation"
+description: "Learn how to browse the web in amongGX using the URL bar, back/forward buttons, reload, and the home shortcut to the Among Us fan page."
+---
+
+amongGX provides a familiar browser navigation experience built on top of PyQt5's `QWebEngineView`. Every control — from typing a URL to jumping back in history — is wired directly into Qt's web engine.
+
+## The URL Bar
+
+The URL bar is a `QLineEdit` widget embedded in the navigation toolbar. When you type a URL and press <kbd>Enter</kbd>, it fires the `returnPressed` signal, which is connected to the `navigate_to_url` method.
+
+```python
+self.urlbar = QLineEdit()
+self.urlbar.returnPressed.connect(self.navigate_to_url)
+```
+
+### Automatic Scheme Injection
+
+You don't need to type `http://` every time. If the URL you enter has no scheme, `navigate_to_url` automatically prepends `http://` before loading the page:
+
+```python
+def navigate_to_url(self):
+    q = QUrl(self.urlbar.text())
+    if q.scheme() == "":
+        q.setScheme("http")
+    self.browser.setUrl(q)
+```
+
+So typing `example.com` and pressing <kbd>Enter</kbd> loads `http://example.com` — no manual prefix required.
+
+## Back and Forward
+
+The **⤶** (back) and **⤷** (forward) toolbar buttons let you step through your browsing history just like any standard browser. They call the built-in `QWebEngineView` history methods directly:
+
+```python
+back = QAction("⤶", self)
+back.setStatusTip("Go Back")
+back.triggered.connect(self.browser.back)
+
+forw = QAction("⤷", self)
+forw.setStatusTip("Go Forward")
+forw.triggered.connect(self.browser.forward)
+```
+
+- **⤶** calls `browser.back()` — navigates to the previous page in history.
+- **⤷** calls `browser.forward()` — navigates to the next page in history (only available after going back).
+
+## Reload
+
+The **⟳** button reloads the current page by calling `browser.reload()`:
+
+```python
+rel = QAction("⟳", self)
+rel.setStatusTip("Reload")
+rel.triggered.connect(self.browser.reload)
+```
+
+Use this to refresh a page that has stalled, errored, or needs updated content.
+
+## The Home Button
+
+Clicking **Home** in the toolbar always returns you to the official Among Us fan page hosted on Robowolf. The `go_home` method sets the browser URL directly:
+
+```python
+def go_home(self):
+    self.browser.setUrl(QUrl("https://Among.robowolf.repl.co"))
+```
+
+The Home button's status tip reads **"Return to the Skeld"** — a nod to the iconic Among Us map.
+
+## Automatic URL Bar Updates
+
+The URL bar stays in sync with the browser automatically. Whenever the browser navigates — whether from a button click, a redirect, or an in-page link — the `urlChanged` signal fires and calls `update_urlbar`, which writes the new URL into the bar:
+
+```python
+self.browser.urlChanged.connect(self.update_urlbar)
+```
+
+```python
+def update_urlbar(self, q):
+    self.urlbar.setText(q.toString())
+```
+
+The `q` argument is a `QUrl` object; `q.toString()` converts it to the plain string shown in the bar.
+
+---
+
+## A Typical Browse Session
+
+<Steps>
+  <Step title="Launch amongGX">
+    The browser opens and automatically loads the home page at `https://Among.robowolf.repl.co`. The URL bar is populated via the `urlChanged` signal.
+  </Step>
+  <Step title="Type a URL">
+    Click the URL bar, type a destination such as `wikipedia.org`, and press <kbd>Enter</kbd>. Because no scheme was provided, `navigate_to_url` prepends `http://` and loads `http://wikipedia.org`.
+  </Step>
+  <Step title="Follow a link">
+    Click any hyperlink on the page. The browser navigates and the URL bar updates automatically through `update_urlbar`.
+  </Step>
+  <Step title="Go back">
+    Click **⤶** to return to the previous page (`browser.back()`). The URL bar reflects the previous address.
+  </Step>
+  <Step title="Go forward">
+    Click **⤷** to move forward again (`browser.forward()`).
+  </Step>
+  <Step title="Reload">
+    Click **⟳** to refresh the current page (`browser.reload()`).
+  </Step>
+  <Step title="Return home">
+    Click **Home** to jump back to `https://Among.robowolf.repl.co` at any time via `go_home()`.
+  </Step>
+</Steps>

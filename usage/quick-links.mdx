@@ -1,0 +1,96 @@
+---
+title: "Quick-Link Buttons in the amongGX Toolbar"
+sidebarTitle: "Quick Links"
+description: "Among GX includes four one-click quick-link buttons for Discord, YouTube, the Among Us Steam page, and the creator's channel — here's where each one goes."
+---
+
+Quick-link buttons are pre-programmed toolbar shortcuts that navigate the browser to a specific destination in a single click — no typing required. In amongGX, four quick-link buttons sit on the right side of the toolbar, each representing a destination relevant to the Among Us community and the browser's creator.
+
+<Tip>
+  Clicking any quick-link button navigates the **existing browser tab** to that destination. amongGX does not open a new window or tab — the current view is simply replaced with the quick-link URL, just as if you had typed the address in the URL bar yourself.
+</Tip>
+
+---
+
+## Quick-Link Destinations
+
+<CardGroup cols={2}>
+  <Card title="Discord" icon="discord" href="https://www.discord.com">
+    **Label:** `Discord`  
+    **Status Tip:** Socialize  
+    **Destination:** `https://www.discord.com`
+
+    Jump straight to Discord to hang out with the Among Us community. The button's status tip reads **"Socialize"** — fitting for a game all about social deception.
+  </Card>
+
+  <Card title="Music (♫)" icon="music" href="https://www.youtube.com/watch?v=8-NcrRzH0vA">
+    **Label:** `♫`  
+    **Status Tip:** Vibe Check  
+    **Destination:** `https://www.youtube.com/watch?v=8-NcrRzH0vA`
+
+    Opens a curated YouTube track hand-picked by the creator for maximum vibe. Status tip: **"Vibe Check"**.
+  </Card>
+
+  <Card title="Among Us Store (ඞ)" icon="store" href="https://store.steampowered.com/app/945360/Among_Us/">
+    **Label:** `ඞ`  
+    **Status Tip:** Don't Sue Me InnerSloth  
+    **Destination:** `https://store.steampowered.com/app/945360/Among_Us/`
+
+    Opens the Among Us Steam store page. The status tip **"Don't Sue Me InnerSloth"** is a playful nod to the use of the iconic crewmate symbol `ඞ`.
+  </Card>
+
+  <Card title="Subscribe (👍)" icon="thumbs-up" href="https://www.youtube.com/channel/UClDPJcyKnwUiAX1UQgZgoAw">
+    **Label:** `👍`  
+    **Status Tip:** Sub to me plz  
+    **Destination:** `https://www.youtube.com/channel/UClDPJcyKnwUiAX1UQgZgoAw`
+
+    Opens the creator's YouTube channel. Status tip: **"Sub to me plz"** — because every creator appreciates a subscription.
+  </Card>
+</CardGroup>
+
+---
+
+## Source Code
+
+Each quick-link is implemented as its own method on `MainWindow` that calls `self.browser.setUrl()` with a hardcoded `QUrl`:
+
+```python
+def discord(self):
+    self.browser.setUrl(QUrl("https://www.discord.com"))
+
+def trap(self):
+    self.browser.setUrl(QUrl("https://www.youtube.com/watch?v=8-NcrRzH0vA"))
+
+def get_amongus(self):
+    self.browser.setUrl(QUrl("https://store.steampowered.com/app/945360/Among_Us/"))
+
+def subscribe(self):
+    self.browser.setUrl(QUrl("https://www.youtube.com/channel/UClDPJcyKnwUiAX1UQgZgoAw"))
+```
+
+The corresponding `QAction` objects are created, given status tips, and wired to these methods in `__init__`:
+
+```python
+disc = QAction("Discord", self)
+disc.setStatusTip("Socialize")
+disc.triggered.connect(self.discord)
+
+trap = QAction("♫", self)
+trap.setStatusTip("Vibe Check")
+trap.triggered.connect(self.trap)
+
+store = QAction("ඞ", self)
+store.setStatusTip("Don't Sue Me InnerSloth")
+store.triggered.connect(self.get_amongus)
+
+sub = QAction("👍", self)
+sub.setStatusTip("Sub to me plz")
+sub.triggered.connect(self.subscribe)
+
+navtb.addAction(disc)
+navtb.addAction(trap)
+navtb.addAction(store)
+navtb.addAction(sub)
+```
+
+All four actions are appended to the toolbar **after** the URL bar widget, placing them permanently on the right side of the toolbar strip.

@@ -1,0 +1,118 @@
+---
+title: "amongGX: An Among Us Browser Built with PyQt5"
+sidebarTitle: "Introduction"
+description: "amongGX is a PyQt5 desktop browser themed around Among Us. Learn its architecture, key features, and how QtWebEngine powers the browsing experience."
+---
+
+## What is amongGX?
+
+**amongGX** is a single-file Python desktop web browser built on top of **PyQt5** and **QtWebEngine**. Themed around the popular game *Among Us*, it wraps a fully functional Chromium-based browser engine inside a native desktop window — complete with navigation controls, a URL bar, and a quick-link toolbar that whisks you directly to Discord, music, Steam, and the creator's channel.
+
+The entire application lives in one file — `browser.py` — making it easy to understand, run, and modify. It was created by **Ulto4** as a fun, functional demonstration of how quickly PyQt5 can turn a browser engine into a polished desktop app.
+
+---
+
+## Architecture Overview
+
+### The `MainWindow` Class
+
+The heart of the application is the `MainWindow` class, which subclasses Qt's `QMainWindow`. This gives the app a full main-window shell — including support for toolbars, a status bar, and a central widget area — without writing any boilerplate window management code.
+
+```python
+class MainWindow(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+        ...
+```
+
+All UI setup happens inside `__init__`: the web view is created and mounted, toolbars are built, and signals are wired to their slots.
+
+### The `QWebEngineView` Central Widget
+
+The browser's rendering is handled by a `QWebEngineView` instance, which embeds the full **Chromium** rendering engine (via QtWebEngine) directly into the Qt widget tree. It is set as the window's **central widget**, meaning it fills all available space not occupied by toolbars or the status bar.
+
+```python
+self.browser = QWebEngineView()
+self.browser.setUrl(QUrl("https://Among.robowolf.repl.co"))
+self.setCentralWidget(self.browser)
+```
+
+Two signals on the view drive the rest of the UI:
+
+| Signal | Slot | Purpose |
+|---|---|---|
+| `urlChanged` | `update_urlbar` | Keeps the URL bar in sync with the current page address |
+| `loadFinished` | `update_title` | Updates the window title once a page finishes loading |
+
+### Application Entry Point
+
+At the bottom of `browser.py`, a standard Qt application lifecycle is kicked off:
+
+```python
+app = QApplication(sys.argv)
+app.setApplicationName("Among")
+window = MainWindow()
+app.exec_()
+```
+
+`QApplication` manages the event loop. `app.setApplicationName("Among")` sets the OS-level application name, and `app.exec_()` blocks until the window is closed.
+
+---
+
+## Key Features
+
+### 🏠 Home Button
+A dedicated **Home** toolbar action (with status-bar tooltip *"Return to the Skeld"*) navigates back to the default Among Us fan page at any time.
+
+### ◀ ▶ ⟳ Navigation Controls
+Three toolbar actions provide standard browser navigation:
+
+- **⤶ Back** — navigates to the previous page in history
+- **⤷ Forward** — navigates to the next page in history  
+- **⟳ Reload** — reloads the current page
+
+### 🔗 URL Bar with Scheme Detection
+A `QLineEdit` URL bar lets users type any address. When the user presses **Return**, the `navigate_to_url` slot fires and checks whether the entered text includes a URL scheme. If none is present, `http://` is automatically prepended:
+
+```python
+def navigate_to_url(self):
+    q = QUrl(self.urlbar.text())
+    if q.scheme() == "":
+        q.setScheme("http")
+    self.browser.setUrl(q)
+```
+
+### 📝 Dynamic Window Title
+After every page load, the window title is updated to `Among - <page title>`, incorporating the live page title returned by the browser engine:
+
+```python
+def update_title(self):
+    title = self.browser.page().title()
+    self.setWindowTitle(f'Among - {title}')
+```
+
+### ⚡ Quick-Link Toolbar Buttons
+Four one-click toolbar shortcuts round out the toolbar:
+
+| Button | Label | Destination |
+|---|---|---|
+| 💬 | `Discord` | `https://www.discord.com` |
+| 🎵 | `♫` | YouTube music link (vibe check) |
+| 🎮 | `ඞ` | Among Us on Steam (`store.steampowered.com`) |
+| 👍 | `👍` | Creator's YouTube channel (subscribe!) |
+
+### 🌐 Default Home Page
+The browser opens on `https://Among.robowolf.repl.co` — an Among Us fan page — on every launch. The same URL is restored whenever the Home button is clicked.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="wrench" href="installation">
+    Install Python, PyQt5, and QtWebEngine so you can run amongGX on your desktop.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="quickstart">
+    Launch the browser in under five minutes and take it for your first spin.
+  </Card>
+</CardGroup>

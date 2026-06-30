@@ -1,0 +1,139 @@
+---
+title: "Configuring and Customizing amongGX"
+sidebarTitle: "Configuration"
+description: "Learn how to change the home page URL, window title prefix, quick-link destinations, and application name in the amongGX source code."
+---
+
+<Warning>
+  amongGX has no external configuration file. All customizations require editing
+  `browser.py` directly. Back up the file before making changes.
+</Warning>
+
+## Configurable Parameters
+
+The three core settings that affect how amongGX presents itself to the user and the operating system are described below.
+
+<ParamField path="HOME_URL" type="string" default="https://Among.robowolf.repl.co">
+  The URL loaded when the browser launches and when the **Home** toolbar button is pressed.
+  It is set in two places inside `browser.py`: the `__init__` method and the `go_home` method.
+</ParamField>
+
+<ParamField path="WINDOW_TITLE_PREFIX" type="string" default="Among">
+  The string prepended to the current page title in the window title bar.
+  Formatted as `f'{prefix} - {page_title}'` inside `update_title()`.
+</ParamField>
+
+<ParamField path="APP_NAME" type="string" default="Among">
+  The OS-level application name registered via `QApplication.setApplicationName()`.
+  This value appears in taskbars, system monitors, and macOS menu bars.
+</ParamField>
+
+---
+
+## Changing the Home Page URL
+
+The home page URL is hardcoded in two places. Both must be updated together so that the launch page and the **Home** button load the same destination.
+
+**In `__init__`** (the initial page load on startup):
+
+```python
+# browser.py — __init__
+self.browser.setUrl(QUrl("https://Among.robowolf.repl.co"))  # [!code --]
+self.browser.setUrl(QUrl("https://your-new-homepage.example.com"))  # [!code ++]
+```
+
+**In `go_home()`** (triggered by the Home toolbar button):
+
+```python
+# browser.py — go_home()
+def go_home(self):
+    self.browser.setUrl(QUrl('https://Among.robowolf.repl.co'))  # [!code --]
+    self.browser.setUrl(QUrl('https://your-new-homepage.example.com'))  # [!code ++]
+```
+
+Replace `https://your-new-homepage.example.com` with any fully-qualified URL, including `http://` addresses or local server URLs such as `http://localhost:8080`.
+
+---
+
+## Changing the Window Title Prefix
+
+The window title is assembled in `update_title()` using a Python f-string. The word `Among` before the dash is the prefix.
+
+```python
+# browser.py — update_title()
+def update_title(self):
+    title = self.browser.page().title()
+    self.setWindowTitle(f'Among - {title}')  # [!code --]
+    self.setWindowTitle(f'MyBrowser - {title}')  # [!code ++]
+```
+
+The `{title}` placeholder is replaced at runtime with whatever title the currently loaded web page reports. Do not remove it unless you want a static window title.
+
+---
+
+## Changing the Application Name
+
+The OS-level application name is set near the bottom of `browser.py`, after the `MainWindow` class definition:
+
+```python
+# browser.py — bottom of file
+app = QApplication(sys.argv)
+app.setApplicationName("Among")  # [!code --]
+app.setApplicationName("MyBrowser")  # [!code ++]
+```
+
+This name appears in the operating system's process list, taskbar grouping, and (on macOS) the menu bar. It is independent of the window title prefix above.
+
+---
+
+## Updating Quick-Link URLs
+
+The toolbar contains four quick-link buttons, each backed by a dedicated method that calls `self.browser.setUrl()`. Update the URL string inside the relevant method to redirect that button to a different destination.
+
+### Discord button
+
+```python
+def discord(self):
+    self.browser.setUrl(QUrl('https://www.discord.com'))  # [!code --]
+    self.browser.setUrl(QUrl('https://discord.gg/your-invite-code'))  # [!code ++]
+```
+
+### Music button (♫)
+
+```python
+def trap(self):
+    self.browser.setUrl(QUrl('https://www.youtube.com/watch?v=8-NcrRzH0vA'))  # [!code --]
+    self.browser.setUrl(QUrl('https://www.youtube.com/watch?v=YOUR_VIDEO_ID'))  # [!code ++]
+```
+
+### Among Us store button (ඞ)
+
+```python
+def get_amongus(self):
+    self.browser.setUrl(QUrl('https://store.steampowered.com/app/945360/Among_Us/'))  # [!code --]
+    self.browser.setUrl(QUrl('https://your-store-link.example.com'))  # [!code ++]
+```
+
+### Subscribe button (👍)
+
+```python
+def subscribe(self):
+    self.browser.setUrl(QUrl(  # [!code --]
+        'https://www.youtube.com/channel/UClDPJcyKnwUiAX1UQgZgoAw'))  # [!code --]
+    self.browser.setUrl(QUrl('https://www.youtube.com/@YourChannel'))  # [!code ++]
+```
+
+---
+
+## Starting the Window Maximized
+
+By default, `MainWindow.__init__` calls `self.show()`, which opens the browser at its default size. A call to `self.showMaximized()` is present in the source but commented out:
+
+```python
+# browser.py — end of __init__
+#self.showMaximized()  # [!code --]
+self.showMaximized()   # [!code ++]
+self.show()
+```
+
+Remove or comment out the `self.show()` line after enabling `self.showMaximized()`, because `showMaximized()` already makes the window visible — calling `self.show()` immediately after is harmless but redundant.

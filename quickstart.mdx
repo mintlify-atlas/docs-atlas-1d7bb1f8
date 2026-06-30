@@ -1,47 +1,116 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get Started with amongGX in Minutes"
+sidebarTitle: "Quickstart"
+description: "Launch the amongGX browser from source in under five minutes. Covers dependency installation, running browser.py, and your first navigation actions."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+## Launch amongGX in Under Five Minutes
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Clone or download the repository">
+    Grab the single source file from GitHub:
 
     ```bash
-    npm install your-package
+    git clone https://github.com/Ulto85/amongGX.git
+    cd amongGX
+    ```
+
+    No build step or compilation required — the entire application is `browser.py`.
+  </Step>
+
+  <Step title="Install the Python dependencies">
+    Install PyQt5 and its QtWebEngine module with pip:
+
+    ```bash
+    pip install PyQt5 PyQtWebEngine
+    ```
+
+    These two packages are the only runtime dependencies. If you prefer an isolated environment, create a virtualenv first:
+
+    ```bash
+    python -m venv venv
+    source venv/bin/activate      # Windows: venv\Scripts\activate
+    pip install PyQt5 PyQtWebEngine
     ```
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
+  <Step title="Run the browser">
     ```bash
-    your-cli init
+    python browser.py
     ```
+
+    That's it. Python executes the script, Qt initialises, and the browser window opens.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
 
-    ```bash
-    your-cli start
+  <Step title="The Among Us fan page loads as your home">
+    On first launch the browser automatically navigates to the default home page:
+
     ```
+    https://Among.robowolf.repl.co
+    ```
+
+    The window title bar will read **`Among - <page title>`** (for example `Among - Among Us Fan Page`) as soon as the page finishes loading — this is set dynamically by the `update_title` slot every time a page load completes.
+
+    You will also see the full toolbar across the top of the window: **Home**, **⤶ Back**, **⤷ Forward**, **⟳ Reload**, the **URL bar**, and the four quick-link buttons — **Discord**, **♫**, **ඞ** (Steam), and **👍**.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+---
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+## Entry Point
+
+The bottom of `browser.py` contains the standard Qt application bootstrap that starts everything:
+
+```python
+app = QApplication(sys.argv)
+app.setApplicationName("Among")
+window = MainWindow()
+app.exec_()
+```
+
+| Line | What it does |
+|---|---|
+| `QApplication(sys.argv)` | Creates the Qt application object and hands it any command-line arguments |
+| `app.setApplicationName("Among")` | Sets the OS-level application name to `"Among"` |
+| `window = MainWindow()` | Instantiates the main window, builds all UI, and calls `self.show()` |
+| `app.exec_()` | Enters the Qt event loop — the call blocks until the window is closed |
+
+---
+
+## Your First Navigation
+
+Once the browser is open, try the following:
+
+### Typing a URL
+
+Click the URL bar, type an address, and press **Enter**. You can type with or without a scheme:
+
+```
+google.com
+```
+
+<Tip>
+  If you type a URL **without** a scheme (e.g. `google.com` instead of `http://google.com`), amongGX automatically prepends `http://` for you. The `navigate_to_url` method checks `q.scheme() == ""` and calls `q.setScheme("http")` before loading the page.
 </Tip>
+
+### Using the Toolbar Buttons
+
+| Button | Action |
+|---|---|
+| **Home** | Returns to `https://Among.robowolf.repl.co` |
+| **⤶** | Goes back one page in the browsing history |
+| **⤷** | Goes forward one page in the browsing history |
+| **⟳** | Reloads the current page |
+| **Discord** | Opens `discord.com` |
+| **♫** | Opens a YouTube music link (vibe check) |
+| **ඞ** | Opens Among Us on the Steam store |
+| **👍** | Opens the creator's YouTube channel |
+
+---
+
+## Next Steps
+
+Now that the browser is running, explore the detailed usage guides:
+
+- [Navigation controls](/usage/navigation) — deep dive into the back/forward/reload/home actions and URL bar behaviour
+- [Toolbar quick-links](/usage/toolbar) — learn more about the Discord, music, Steam, and subscribe shortcuts

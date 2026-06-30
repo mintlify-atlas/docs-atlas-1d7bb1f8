@@ -1,0 +1,117 @@
+---
+title: "amongGX Toolbar: Controls and Layout"
+sidebarTitle: "Toolbar"
+description: "A complete reference for the amongGX navigation toolbar — every button, its icon, status tip, and the action it triggers in the browser."
+---
+
+The amongGX toolbar is a `QToolBar` named `"Navigation"` that spans the top of the main window. It holds all navigation controls and quick-link buttons in a single horizontal strip, making every feature one click away.
+
+## Toolbar Construction
+
+The toolbar is created and added to the `MainWindow` in `__init__`:
+
+```python
+navtb = QToolBar("Navigation")
+self.addToolBar(navtb)
+```
+
+After the toolbar is created, actions and widgets are added to it in order from left to right:
+
+```python
+navtb.addAction(homebtn)   # Home
+navtb.addAction(back)      # ⤶ Back
+navtb.addAction(forw)      # ⤷ Forward
+navtb.addAction(rel)       # ⟳ Reload
+navtb.addWidget(self.urlbar)  # URL bar (stretches to fill space)
+navtb.addAction(disc)      # Discord
+navtb.addAction(trap)      # ♫ Music
+navtb.addAction(store)     # ඞ Among Us Store
+navtb.addAction(sub)       # 👍 Subscribe
+```
+
+The URL bar (`QLineEdit`) is inserted as a **widget** — not an action — so it expands to fill the available horizontal space between the navigation actions on the left and the quick-link actions on the right.
+
+## Action Reference
+
+Every clickable element in the toolbar is a `QAction`. The table below lists each action in toolbar order:
+
+| Label | Status Tip | Method Called | Description |
+|-------|-----------|---------------|-------------|
+| `Home` | Return to the Skeld | `go_home()` | Loads the Among Us fan home page |
+| `⤶` | Go Back | `browser.back()` | Navigates to the previous page in history |
+| `⤷` | Go Forward | `browser.forward()` | Navigates to the next page in history |
+| `⟳` | Reload | `browser.reload()` | Reloads the current page |
+| *(URL bar)* | — | `navigate_to_url()` on <kbd>Enter</kbd> | Address input widget |
+| `Discord` | Socialize | `discord()` | Opens Discord in the browser |
+| `♫` | Vibe Check | `trap()` | Opens a YouTube music link |
+| `ඞ` | Don't Sue Me InnerSloth | `get_amongus()` | Opens the Among Us Steam page |
+| `👍` | Sub to me plz | `subscribe()` | Opens the creator's YouTube channel |
+
+## Full Toolbar Source
+
+Below is the complete toolbar setup as it appears in `browser.py`:
+
+```python
+navtb = QToolBar("Navigation")
+self.addToolBar(navtb)
+
+homebtn = QAction("Home", self)
+homebtn.setStatusTip("Return to the Skeld")
+homebtn.triggered.connect(self.go_home)
+navtb.addAction(homebtn)
+
+rel = QAction("⟳", self)
+rel.setStatusTip("Reload")
+rel.triggered.connect(self.browser.reload)
+
+back = QAction("⤶", self)
+back.setStatusTip("Go Back")
+back.triggered.connect(self.browser.back)
+
+forw = QAction("⤷", self)
+forw.setStatusTip("Go Forward")
+forw.triggered.connect(self.browser.forward)
+
+navtb.addAction(back)
+navtb.addAction(forw)
+navtb.addAction(rel)
+navtb.addWidget(self.urlbar)
+
+disc = QAction("Discord", self)
+disc.setStatusTip("Socialize")
+disc.triggered.connect(self.discord)
+
+trap = QAction("♫", self)
+trap.setStatusTip("Vibe Check")
+trap.triggered.connect(self.trap)
+
+store = QAction("ඞ", self)
+store.setStatusTip("Don't Sue Me InnerSloth")
+store.triggered.connect(self.get_amongus)
+
+sub = QAction("👍", self)
+sub.setStatusTip("Sub to me plz")
+sub.triggered.connect(self.subscribe)
+
+navtb.addAction(disc)
+navtb.addAction(trap)
+navtb.addAction(store)
+navtb.addAction(sub)
+```
+
+## Toolbar Layout at a Glance
+
+```
+[ Home ][ ⤶ ][ ⤷ ][ ⟳ ][       URL bar       ][ Discord ][ ♫ ][ ඞ ][ 👍 ]
+```
+
+The four navigation controls (Home, Back, Forward, Reload) anchor the left side. The URL bar stretches dynamically to fill remaining space. The four quick-link buttons (Discord, Music, Among Us, Subscribe) are fixed to the right end.
+
+<Note>
+  The `QStatusBar` at the bottom of the window displays each action's **status tip** text whenever you hover over a toolbar button. For example, hovering over the `ඞ` button shows `"Don't Sue Me InnerSloth"` in the status bar. This is powered by Qt's built-in status tip mechanism — no extra code is required beyond `setStatusTip()`.
+
+  ```python
+  self.status = QStatusBar()
+  self.setStatusBar(self.status)
+  ```
+</Note>

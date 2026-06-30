@@ -1,0 +1,173 @@
+---
+title: "Troubleshooting Common amongGX Issues"
+sidebarTitle: "Troubleshooting"
+description: "Fix the most common errors when running amongGX: missing PyQt5, missing WebEngine, display issues, and URL navigation problems."
+---
+
+<Note>
+  If your issue is not covered on this page, please open a ticket on the
+  [GitHub issues page](https://github.com/Ulto85/amongGX) so it can be tracked
+  and fixed upstream.
+</Note>
+
+<AccordionGroup>
+
+<Accordion title="ModuleNotFoundError: No module named 'PyQt5'">
+
+PyQt5 is not installed in your current Python environment. Install it with pip:
+
+```bash
+pip install PyQt5
+```
+
+If you are using a virtual environment, make sure it is activated before running the command. On some Linux distributions the system Python package manager must be used instead:
+
+```bash
+# Debian / Ubuntu
+sudo apt install python3-pyqt5
+
+# Fedora
+sudo dnf install python3-qt5
+```
+
+After installation, verify the import works before launching the browser:
+
+```bash
+python -c "from PyQt5.QtWidgets import QApplication; print('PyQt5 OK')"
+```
+
+</Accordion>
+
+<Accordion title="ModuleNotFoundError: No module named 'PyQt5.QtWebEngineWidgets'">
+
+`QtWebEngineWidgets` ships in a **separate package** called `PyQtWebEngine` on most platforms and is not automatically installed alongside `PyQt5`.
+
+```bash
+pip install PyQtWebEngine
+```
+
+On Linux you may alternatively install the system package:
+
+```bash
+# Debian / Ubuntu
+sudo apt install python3-pyqt5.qtwebengine
+
+# Fedora
+sudo dnf install python3-qt5-webengine
+```
+
+Confirm the fix:
+
+```bash
+python -c "from PyQt5.QtWebEngineWidgets import QWebEngineView; print('WebEngine OK')"
+```
+
+</Accordion>
+
+<Accordion title="Blank or white window on Linux">
+
+Qt WebEngine relies on **OpenGL** to render pages. A blank or entirely white window on Linux usually means one of the following:
+
+1. **Missing OpenGL / Mesa drivers** — Install the required libraries:
+
+   ```bash
+   # Debian / Ubuntu
+   sudo apt install libgl1-mesa-glx libegl1-mesa libxcb-glx0
+   ```
+
+2. **XCB OpenGL integration conflict** — Disable the XCB GL integration before launching:
+
+   ```bash
+   export QT_XCB_GL_INTEGRATION=none
+   python browser.py
+   ```
+
+3. **Missing `libxcb` platform plugins** — Ensure the full `libxcb` stack is present:
+
+   ```bash
+   sudo apt install libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+       libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1
+   ```
+
+If none of the above resolves the issue, try running with software rendering:
+
+```bash
+export LIBGL_ALWAYS_SOFTWARE=1
+python browser.py
+```
+
+</Accordion>
+
+<Accordion title='"could not connect to display" error'>
+
+amongGX is a graphical desktop application built on PyQt5 and **requires a running display server**. This error means Qt cannot find one.
+
+| Environment | Solution |
+|---|---|
+| Linux desktop (X11) | Ensure you are running from a terminal inside your graphical session, not over a bare SSH connection. |
+| Linux with Wayland | Set `QT_QPA_PLATFORM=wayland` before running, or install `libqt5waylandclient5`. |
+| Headless server / CI | Forward X11 over SSH (`ssh -X`) or use a virtual display: `Xvfb :99 -screen 0 1280x800x24 & DISPLAY=:99 python browser.py` |
+| Windows / macOS | This error should not appear; ensure no conflicting `DISPLAY` environment variable is set. |
+
+```bash
+# Quick X11 forwarding example
+ssh -X user@your-server
+python browser.py
+```
+
+</Accordion>
+
+<Accordion title="URL bar not navigating to a new page">
+
+Typing a URL into the address bar and clicking elsewhere will **not** trigger navigation. amongGX connects the `returnPressed` signal of the URL bar to `navigate_to_url()`:
+
+```python
+self.urlbar.returnPressed.connect(self.navigate_to_url)
+```
+
+**You must press <kbd>Enter</kbd> after typing the URL** to load the page.
+
+Additionally, if you type an address without a scheme (e.g. `example.com` instead of `https://example.com`), the browser automatically prepends `http://`:
+
+```python
+def navigate_to_url(self):
+    q = QUrl(self.urlbar.text())
+    if q.scheme() == "":
+        q.setScheme("http")
+    self.browser.setUrl(q)
+```
+
+If the page still does not load, check that the URL is reachable from your machine and that no firewall is blocking outbound connections.
+
+</Accordion>
+
+<Accordion title="Home button goes to a blank or error page">
+
+The default home page (`https://Among.robowolf.repl.co`) is a Replit-hosted project that **may be offline or sleeping**. Free-tier Replit instances shut down after a period of inactivity and can take a moment to wake up, or may be permanently unavailable.
+
+To permanently replace the home page with a URL of your choice, edit the two locations in `browser.py` where it is set. See the [Configuration](/reference/configuration) page for step-by-step instructions.
+
+</Accordion>
+
+<Accordion title="Window does not maximize on launch">
+
+The line that starts the browser maximized exists in `browser.py` but is **commented out**:
+
+```python
+#self.showMaximized()
+self.show()
+```
+
+To start the window in a maximized state, uncomment `showMaximized()` and remove (or comment out) the plain `show()` call directly below it:
+
+```python
+# browser.py — end of __init__
+self.showMaximized()
+# self.show()
+```
+
+`showMaximized()` implicitly shows the window, so `self.show()` is not needed when it is present.
+
+</Accordion>
+
+</AccordionGroup>

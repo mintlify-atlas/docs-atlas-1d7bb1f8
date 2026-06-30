@@ -1,0 +1,44 @@
+{
+  "projectType": "general",
+  "projectName": "amongGX",
+  "projectDescription": "A PyQt5-based desktop web browser themed around Among Us, with navigation controls and quick-access buttons for Discord, Steam, and YouTube.",
+  "theme": "palm",
+  "primaryColor": "#C0392B",
+  "lightColor": "#E74C3C",
+  "darkColor": "#922B21",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": ["introduction", "installation", "quickstart"]
+      },
+      {
+        "group": "Using amongGX",
+        "pages": ["usage/navigation", "usage/toolbar", "usage/quick-links"]
+      },
+      {
+        "group": "Reference",
+        "pages": ["reference/configuration", "reference/troubleshooting"]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Among Us-themed desktop browser built with PyQt5 and QtWebEngine",
+    "Navigation toolbar with back, forward, and reload buttons",
+    "URL bar with scheme auto-detection",
+    "Home button that returns to the Among Us fan page",
+    "One-click quick-links: Discord, YouTube music, Steam store, creator's YouTube channel",
+    "Dynamic window title reflecting the current page title"
+  ],
+  "publicApiSurface": [
+    "MainWindow.__init__",
+    "MainWindow.update_title",
+    "MainWindow.update_urlbar",
+    "MainWindow.navigate_to_url",
+    "MainWindow.go_home",
+    "MainWindow.discord",
+    "MainWindow.trap",
+    "MainWindow.get_amongus",
+    "MainWindow.subscribe"
+  ]
+}

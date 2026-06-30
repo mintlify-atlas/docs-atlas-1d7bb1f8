@@ -1,0 +1,170 @@
+---
+title: "Install and Configure amongGX on Your Desktop"
+sidebarTitle: "Installation"
+description: "Step-by-step guide to installing Python, PyQt5, and QtWebEngine so you can run amongGX on Windows, macOS, or Linux."
+---
+
+## Prerequisites
+
+Before you can run amongGX you need two things on your machine:
+
+| Requirement | Minimum Version | Notes |
+|---|---|---|
+| **Python** | 3.7+ | Any 3.7, 3.8, 3.9, 3.10, or 3.11 release works |
+| **pip** | bundled with Python | Used to install PyQt5 and PyQtWebEngine |
+
+Confirm both are available by running:
+
+```bash
+python --version
+pip --version
+```
+
+<Note>
+  amongGX relies on Qt's windowing system to display the browser. **A graphical desktop environment is required** — Qt cannot run in a headless or server-only environment. If you are on a headless Linux machine (e.g., a VPS or CI runner), you will need a virtual framebuffer such as `Xvfb` or a full desktop session.
+</Note>
+
+---
+
+## Python Dependencies
+
+`browser.py` imports from three PyQt5 packages:
+
+```python
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtWebEngineWidgets import *
+```
+
+These map to two pip packages:
+
+| pip package | What it provides |
+|---|---|
+| `PyQt5` | `QtCore`, `QtWidgets`, and the rest of the Qt bindings |
+| `PyQtWebEngine` | `QtWebEngineWidgets` — the Chromium-backed web view |
+
+### Installing the Dependencies
+
+<CodeGroup>
+
+```bash pip (recommended)
+pip install PyQt5 PyQtWebEngine
+```
+
+```bash pip3 (if python3 is default)
+pip3 install PyQt5 PyQtWebEngine
+```
+
+```bash virtual environment (best practice)
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install PyQt5 PyQtWebEngine
+```
+
+```bash Windows (if pip is not on PATH)
+python -m pip install PyQt5 PyQtWebEngine
+```
+
+</CodeGroup>
+
+---
+
+## Getting the Source Code
+
+amongGX is a single-file application — everything lives in `browser.py`.
+
+<CodeGroup>
+
+```bash Clone with Git
+git clone https://github.com/Ulto85/amongGX.git
+cd amongGX
+```
+
+```bash Download the file directly
+# If you only want the single script, save browser.py from the repository
+# to a local folder, for example:
+curl -O https://raw.githubusercontent.com/Ulto85/amongGX/main/browser.py
+```
+
+</CodeGroup>
+
+---
+
+## Step-by-Step Installation
+
+<Steps>
+  <Step title="Verify Python and pip">
+    Open a terminal and confirm you have Python 3.7+ and pip:
+
+    ```bash
+    python --version
+    pip --version
+    ```
+
+    If Python is not installed, download it from [python.org](https://www.python.org/downloads/) and ensure the **"Add Python to PATH"** option is checked during the Windows installer.
+  </Step>
+
+  <Step title="(Optional) Create a virtual environment">
+    Using a virtual environment keeps your global Python install clean:
+
+    ```bash
+    python -m venv venv
+    source venv/bin/activate      # Windows: venv\Scripts\activate
+    ```
+  </Step>
+
+  <Step title="Install PyQt5 and PyQtWebEngine">
+    ```bash
+    pip install PyQt5 PyQtWebEngine
+    ```
+
+    This pulls in the Qt bindings and the Chromium-backed `QtWebEngineWidgets` module that powers the browser view.
+  </Step>
+
+  <Step title="Clone or download the repository">
+    ```bash
+    git clone https://github.com/Ulto85/amongGX.git
+    cd amongGX
+    ```
+
+    If you don't use Git, download `browser.py` directly from the repository and save it to a local folder.
+  </Step>
+
+  <Step title="Run the browser">
+    ```bash
+    python browser.py
+    ```
+
+    The Among Us-themed browser window should appear and navigate to the default home page.
+  </Step>
+</Steps>
+
+---
+
+## Auto-Installing via requirements.txt
+
+The source file contains a commented-out one-liner that can install dependencies automatically:
+
+```python
+#os.system('pip install -r requirements.txt')
+```
+
+If you create a `requirements.txt` in the same directory with the following content:
+
+```text
+PyQt5
+PyQtWebEngine
+```
+
+…you can uncomment that line and `browser.py` will call pip itself on every launch. This is handy when sharing the project with people who may not have the dependencies installed yet. Keep in mind it adds a small startup delay and is not recommended for production use.
+
+---
+
+## Troubleshooting
+
+| Problem | Likely Cause | Fix |
+|---|---|---|
+| `ModuleNotFoundError: No module named 'PyQt5'` | PyQt5 not installed in the active environment | Run `pip install PyQt5 PyQtWebEngine` |
+| `ModuleNotFoundError: No module named 'PyQt5.QtWebEngineWidgets'` | `PyQtWebEngine` missing | Run `pip install PyQtWebEngine` |
+| Window does not appear / crashes on launch | No display server available | Ensure a desktop session or virtual framebuffer is running |
+| `python: command not found` | Python not on PATH | Use `python3` instead, or fix your PATH |
